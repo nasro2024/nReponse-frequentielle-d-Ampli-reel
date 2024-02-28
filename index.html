@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphique avec Chart.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f0f0;
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .container h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+        .container p {
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        .buttons {
+            text-align: center;
+        }
+        .buttons button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+        .buttons button:last-child {
+            margin-right: 0;
+        }
+        canvas {
+            width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>REPONSE FREQUENTIELLE D'AMPLIFICATEUR REEL.</h2>
+         <h2>Par Benahmed Nasreddine, Univ. Tlemcen, ALGERIE.</h2>
+        <p>Bienvenue sur notre application qui permet de tracer le module en dB de la fonction de transfert H(p) d'un amplificateur reel: H(p)=Av / [1+ (p / (2 pi fh))].</p> 
+       
+        <p>NOTA: ACTUALISEZ LA PAGE HTML APRES CHAQUE EXECUTION.</p>
+        <div class="input-group">
+            <label for="av">ENTREZ LE GAIN EN TENSION (Av) DE LA REPONSE PLATE:</label>
+            <input type="number" id="av" step="0.01" placeholder="Av en decimal">
+        </div>
+        <div class="input-group">
+            <label for="fh">ENTREZ LA FREQUENCE HAUTE (fh) DE LA REPONSE PLATE EN KHz :</label>
+            <input type="number" id="fh" step="0.01" placeholder="fh en KHz">
+        </div>
+        <div class="input-group">
+            <label for="fmin">ENTREZ LA FREQUENCE MINIMALE (fmin) EN Hz :</label>
+            <input type="number" id="fmin" step="0.01" placeholder="fmin en Hz">
+        </div>
+        <div class="input-group">
+            <label for="fmax">ENTREZ LA FREQUENCE MAXIMALE (fmax) en MHz :</label>
+            <input type="number" id="fmax" step="0.01" placeholder="fmax en MHz">
+        </div>
+        <div class="buttons">
+            <button onclick="plot()">PLOT</button>
+            <button onclick="reset()">RESET</button>
+        </div>
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        function plot() {
+            var av = parseFloat(document.getElementById('av').value);
+            var fh = parseFloat(document.getElementById('fh').value) * 1e3; // Convertir KHz en Hz
+            var fmin = parseFloat(document.getElementById('fmin').value);
+            var fmax = parseFloat(document.getElementById('fmax').value) * 1e6; // Convertir MHz en Hz
+
+            var frequencies = [];
+            var moduleDataDB = [];
+
+            for (var f = fmin; f <= fmax; f *= 2) {
+                frequencies.push(f);
+                var p = 2 * Math.PI * f;
+                moduleDataDB.push(20 * Math.log10(Math.abs((2 * Math.PI * av * fh) / (p + 2 * Math.PI * fh))));
+            }
+
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: frequencies,
+                    datasets: [{
+                        label: '|H(p)| (dB)',
+                        data: moduleDataDB,
+                        borderColor: 'blue',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        xAxes: [{
+                            type: 'logarithmic',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Frequency (Hz)'
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Magnitude (dB)'
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+
+        function reset() {
+            var ctx = document.getElementById('myChart').getContext('2d');
+            ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        }
+    </script>
+</body>
+</html>
